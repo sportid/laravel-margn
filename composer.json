@@ -1,0 +1,16 @@
+{
+    "name": "rntorm/laravel-margn",
+    "description": "Package for syncing invoices with Margn",
+    "keywords": ["laravel", "margn"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Rein Torm",
+            "email": "rntorm@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+    	"guzzle/guzzle": "~3.9"
+    }
+}
