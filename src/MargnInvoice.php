@@ -20,7 +20,7 @@ class MargnInvoice extends Margn
     }
 
     // Requires documentType
-    public function getInvoices($data = array())
+    public function getInvoices($data = [])
     {
         $data['documentType'] = 'DOCUMENT_SELL';
         if (!array_key_exists('documentType', $data)) {

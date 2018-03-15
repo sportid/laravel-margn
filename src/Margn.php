@@ -4,28 +4,8 @@ namespace RnTorm\LaravelMargn;
 
 use Guzzle\Http\Client;
 
-/**
-    TODO:
-        - CRON
-
-        - get amount, reference_nr, bankpayment_nr
-        - get compgroup from reference_nr
-
-        - 1) Ref found
-        - 	1) if adv
-        - 		calc transaction amount (take away vat)
-        - 	2) else
-        - 		transaction amount stays the same
-        - 	Create transaction to compgroup, Create payment invoice for compgroup
-        - 2) Ref not found
-        - 	Add amount, bankpayment_nr to invoicepayment - admin can set receiver to link payment with compensationgroup
-
-        - 	id, amount, sender, reference_nr
-
- **/
 class Margn
 {
-    // private $apiKey;
     private $baseUrl;
     public $variables;
 
@@ -38,7 +18,6 @@ class Margn
 
     public function getAccountEntries()
     {
-        // $url = self::BASE_URL;
         $get_response = $this->httpGet();
 
         return $get_response;
@@ -87,7 +66,7 @@ class Margn
         return $get_response;
     }
 
-    public static function postInvoice($data, $additional_params = array('documentType' => 'DOCUMENT_SELL'))
+    public static function postInvoice($data, $additional_params = ['documentType' => 'DOCUMENT_SELL'])
     {
         $url = self::BASE_URL.'/invoices.json';
         if (empty($data)) {
@@ -131,14 +110,14 @@ class Margn
         $request = $client->createRequest(
             'GET',
             $this->baseUrl.$requestUrl,
-            array(
-                'config' => array(
-                    'curl' => array(
+            [
+                'config' => [
+                    'curl' => [
                         CURLOPT_CAINFO => base_path().'\cacert.pem',
                         CURLOPT_SSLVERSION => 3,
-                    ),
-                ),
-            )
+                    ],
+                ],
+            ]
         );
         $query = $request->getQuery();
         if ($this->variables) {
@@ -166,8 +145,8 @@ class Margn
 
         $request = $client->post(
             $this->baseUrl.$requestUrl.'.json',
-            array(),
-            array()
+            [],
+            []
         );
 
         $request->setHeader('Content-Type', 'application/json');
@@ -198,8 +177,8 @@ class Margn
 
         $request = $client->put(
             $this->baseUrl.$requestUrl.'.json',
-            array(),
-            array()
+            [],
+            []
         );
 
         $request->setHeader('Content-Type', 'application/json');
