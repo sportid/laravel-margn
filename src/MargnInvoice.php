@@ -49,8 +49,6 @@ class MargnInvoice extends Margn
 
     public function update($id, $data)
     {
-        // return $id;
-        // return $this->requestUrl . '/' . $id;
         $put_response = $this->httpPut($this->requestUrl.'/'.$id, $data);
 
         return $put_response;
