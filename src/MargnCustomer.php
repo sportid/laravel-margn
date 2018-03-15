@@ -1,35 +1,38 @@
-<?php namespace RnTorm\LaravelMargn;
+<?php
 
-class MargnCustomer extends Margn {
+namespace RnTorm\LaravelMargn;
 
-	private $requestUrl = '/customers';
+class MargnCustomer extends Margn
+{
+    private $requestUrl = '/customers';
 
-	function __construct()
-	{
-       parent::__construct();
-   	}
+    public function __construct()
+    {
+        parent::__construct();
+    }
 
-	// Requires id
-	public function get($id)
-	{
-		$get_response = $this->httpGet($this->requestUrl . '/' . $id);
-		return $get_response;
-	}
+    // Requires id
+    public function get($id)
+    {
+        $get_response = $this->httpGet($this->requestUrl.'/'.$id);
 
-	public function add($data)
-	{
-		if (empty($data))
-		{
-			throw new Exception('No data');
-		}
+        return $get_response;
+    }
 
-		$post_response = $this->httpPost($this->requestUrl, $data);
-		return $post_response;
-	}
+    public function add($data)
+    {
+        if (empty($data)) {
+            throw new Exception('No data');
+        }
 
-	public function update($id, $data)
-	{
-		$data['id'] = $id;
-		$this->httpPut($this->requestUrl . '/'. $id, $data);
-	}
+        $post_response = $this->httpPost($this->requestUrl, $data);
+
+        return $post_response;
+    }
+
+    public function update($id, $data)
+    {
+        $data['id'] = $id;
+        $this->httpPut($this->requestUrl.'/'.$id, $data);
+    }
 }
