@@ -9,9 +9,8 @@
             "email": "rntorm@gmail.com"
         }
     ],
-    "minimum-stability": "dev",
     "require": {
-    	"guzzle/guzzle": "~5.0|~6.0"
+    	"guzzlehttp/guzzle": "~6.0"
     },
     "autoload": {
         "psr-4": {
