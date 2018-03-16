@@ -50,7 +50,7 @@ class Margn
             throw new Exception('id not specified');
         }
 
-        return $this->httpGet('/invoices'.$id);
+        return $this->httpGet('/invoices'.'/'.$id);
     }
 
     public static function postInvoice($data, $additional_params = ['documentType' => 'DOCUMENT_SELL'])
