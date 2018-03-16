@@ -2,7 +2,10 @@
 
 namespace RnTorm\LaravelMargn;
 
-use Guzzle\Http\Client;
+use Exception;
+use Config;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\BadResponseException;
 
 class Margn
 {
@@ -11,40 +14,29 @@ class Margn
 
     public function __construct()
     {
-        $configuration = \Config::get('laravel-margn');
+        $configuration = Config::get('laravel-margn');
         $this->variables['token'] = $configuration['API_KEY'];
         $this->baseUrl = $configuration['BASE_URL'];
     }
 
     public function getAccountEntries()
     {
-        $get_response = $this->httpGet();
-
-        return $get_response;
+        // TODO
     }
 
     public function getAccounts()
     {
-        $requestUrl = '/accounts';
-        $get_response = $this->httpGet($requestUrl);
-
-        return $get_response;
+        return $this->httpGet('/accounts');
     }
 
     public function getArticles()
     {
-        $requestUrl = '/articles';
-        $get_response = self::httpGet($requestUrl);
-
-        return $get_response;
+        return self::httpGet('/articles');
     }
 
     public function getCustomers()
     {
-        $requestUrl = '/customers';
-        $get_response = self::httpGet($requestUrl);
-
-        return $get_response;
+        return self::httpGet('/customers');
     }
 
     public function postCustomers()
@@ -52,154 +44,112 @@ class Margn
         // NO API REQUEST
     }
 
-    // Requires id
     public static function getInvoice($id = null)
     {
-        $requestUrl = '/invoices';
         if (empty($id)) {
-            throw new HttpException(HttpException::BAD_REQUEST, 'id not specified');
-        } else {
-            $requestUrl .= '/'.$id;
+            throw new Exception('id not specified');
         }
-        $get_response = $this->httpGet($requestUrl);
 
-        return $get_response;
+        return $this->httpGet('/invoices'.$id);
     }
 
     public static function postInvoice($data, $additional_params = ['documentType' => 'DOCUMENT_SELL'])
     {
-        $url = self::BASE_URL.'/invoices.json';
         if (empty($data)) {
-            throw new HttpException(HttpException::BAD_REQUEST, 'Invoice post data empty');
+            throw new Exception('Invoice post data empty');
         }
+
         foreach ($data as $key => $value) {
             self::$variables[$key] = $value;
         }
-        $post_response = self::httpPost($url, self::$variables, $data);
 
-        return $post_response;
+        return self::httpPost(self::BASE_URL.'/invoices.json', $data);
     }
 
     public static function getPayments()
     {
-        $url = self::BASE_URL.'/payments';
-        $get_response = self::httpGet($url, self::$variables);
-
-        return $get_response;
+        return self::httpGet(self::BASE_URL.'/payments');
     }
 
     public static function getProjects()
     {
-        $url = self::BASE_URL.'/projects';
-        $get_response = self::httpGet($url, self::$variables);
-
-        return $get_response;
+        return self::httpGet(self::BASE_URL.'/projects');
     }
 
-    public static function TransactionEntries()
+    public static function transactionEntries()
     {
-        $url = self::BASE_URL.'/transaction_entries';
-        $get_response = self::httpGet($url, self::$variables);
-
-        return $get_response;
+        return self::httpGet(self::BASE_URL.'/transaction_entries');
     }
 
     protected function httpGet($requestUrl = null)
     {
         $client = new Client();
-        $request = $client->createRequest(
-            'GET',
-            $this->baseUrl.$requestUrl,
-            [
-                'config' => [
-                    'curl' => [
-                        CURLOPT_CAINFO => base_path().'\cacert.pem',
-                        CURLOPT_SSLVERSION => 3,
-                    ],
-                ],
-            ]
-        );
-        $query = $request->getQuery();
-        if ($this->variables) {
-            foreach ($this->variables as $key => $val) {
-                $query->set($key, $val);
-            }
-        }
-        $response = $client->send($request);
+
+        $args = [
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+            ],
+            'query' => $this->variables,
+        ];
 
         try {
-            $response = $client->send($request);
-            if (200 == $response->getStatusCode()) {
-                return $response->json();
-            } else {
-                throw new HttpException(HttpException::BAD_REQUEST);
-            }
-        } catch (\Exception $e) {
-            throw new HttpException(HttpException::BAD_REQUEST, $e->getMessage());
+            $response = $client->request('GET', $this->baseUrl.$requestUrl, $args);
+        } catch (BadResponseException $e) {
+            \Log::error($e->getResponse()->getBody(true));
+            throw $e;
         }
+
+        return json_decode($response->getBody(), true);
     }
 
     protected function httpPost($requestUrl, $requestData)
     {
         $client = new Client();
 
-        $request = $client->post(
-            $this->baseUrl.$requestUrl.'.json',
-            [],
-            []
-        );
-
-        $request->setHeader('Content-Type', 'application/json');
-        $request->setHeader('Accept', 'application/json');
-
-        $query = $request->getQuery();
-        $query->set('token', $this->variables['token']);
-
-        if (!empty($this->variables)) {
-            $request->setBody(json_encode($requestData));
-        }
+        $args = [
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+            ],
+            'body' => json_encode($requestData),
+            'query' => [
+                'token' => $this->variables['token'],
+            ],
+        ];
 
         try {
-            $response = $client->send($request);
-            if (200 == $response->getStatusCode()) {
-                return $response->json();
-            } else {
-                throw new HttpException(HttpException::BAD_REQUEST);
-            }
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
+            $response = $client->request('POST', $this->baseUrl.$requestUrl.'.json', $args);
+        } catch (BadResponseException $e) {
+            \Log::error($e->getResponse()->getBody(true));
+            throw $e;
         }
+
+        return json_decode($response->getBody(), true);
     }
 
     protected function httpPut($requestUrl, $requestData)
     {
         $client = new Client();
 
-        $request = $client->put(
-            $this->baseUrl.$requestUrl.'.json',
-            [],
-            []
-        );
-
-        $request->setHeader('Content-Type', 'application/json');
-        $request->setHeader('Accept', 'application/json');
-
-        $query = $request->getQuery();
-        $query->set('token', $this->variables['token']);
-
-        if (!empty($this->variables)) {
-            $request->setBody(json_encode($requestData));
-        }
+        $args = [
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+            ],
+            'body' => json_encode($requestData),
+            'query' => [
+                'token' => $this->variables['token'],
+            ],
+        ];
 
         try {
-            $response = $client->send($request);
-            if (200 == $response->getStatusCode()) {
-                return $response->json();
-            } else {
-                throw new HttpException(HttpException::BAD_REQUEST);
-            }
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
+            $response = $client->request('PUT', $this->baseUrl.$requestUrl.'.json', $args);
+        } catch (BadResponseException $e) {
+            \Log::error($e->getResponse()->getBody(true));
+            throw $e;
         }
+
+        return json_decode($response->getBody(), true);
     }
 }

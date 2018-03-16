@@ -14,13 +14,6 @@ class LaravelMargnServiceProvider extends ServiceProvider
         $this->handleConfigs();
     }
 
-    /**
-     * Register the application services.
-     */
-    public function register()
-    {
-    }
-
     public function handleConfigs()
     {
         $configPath = __DIR__.'/../config/config.php';

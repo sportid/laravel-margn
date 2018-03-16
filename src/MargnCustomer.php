@@ -2,21 +2,15 @@
 
 namespace RnTorm\LaravelMargn;
 
+use Exception;
+
 class MargnCustomer extends Margn
 {
     private $requestUrl = '/customers';
 
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    // Requires id
     public function get($id)
     {
-        $get_response = $this->httpGet($this->requestUrl.'/'.$id);
-
-        return $get_response;
+        return $this->httpGet($this->requestUrl.'/'.$id);
     }
 
     public function add($data)
@@ -25,14 +19,13 @@ class MargnCustomer extends Margn
             throw new Exception('No data');
         }
 
-        $post_response = $this->httpPost($this->requestUrl, $data);
-
-        return $post_response;
+        return $this->httpPost($this->requestUrl, $data);
     }
 
     public function update($id, $data)
     {
         $data['id'] = $id;
-        $this->httpPut($this->requestUrl.'/'.$id, $data);
+
+        return $this->httpPut($this->requestUrl.'/'.$id, $data);
     }
 }
