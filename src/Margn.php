@@ -9,7 +9,8 @@ use GuzzleHttp\Exception\BadResponseException;
 
 class Margn
 {
-    private $baseUrl;
+    protected $baseUrl;
+    protected $accountId;
     public $variables;
 
     public function __construct()
@@ -17,6 +18,7 @@ class Margn
         $configuration = Config::get('laravel-margn');
         $this->variables['token'] = $configuration['API_KEY'];
         $this->baseUrl = $configuration['BASE_URL'];
+        $this->accountId = $configuration['ACCOUNT_ID'];
     }
 
     public function getAccountEntries()
@@ -63,22 +65,22 @@ class Margn
             self::$variables[$key] = $value;
         }
 
-        return self::httpPost(self::BASE_URL.'/invoices.json', $data);
+        return self::httpPost('/invoices.json', $data);
     }
 
     public static function getPayments()
     {
-        return self::httpGet(self::BASE_URL.'/payments');
+        return self::httpGet('/payments');
     }
 
     public static function getProjects()
     {
-        return self::httpGet(self::BASE_URL.'/projects');
+        return self::httpGet('/projects');
     }
 
     public static function transactionEntries()
     {
-        return self::httpGet(self::BASE_URL.'/transaction_entries');
+        return self::httpGet('/transaction_entries');
     }
 
     protected function httpGet($requestUrl = null)
