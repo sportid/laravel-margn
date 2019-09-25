@@ -6,7 +6,7 @@ use Exception;
 
 class MargnCustomer extends Margn
 {
-    private $requestUrl = '/customers';
+    private $requestUrl = '/customers/v2';
 
     public function get($id)
     {
