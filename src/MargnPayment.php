@@ -47,5 +47,4 @@ class MargnPayment extends Margn
 
         return $data;
     }
-
 }
